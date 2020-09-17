@@ -1,1 +1,1 @@
-"# COMPENG-4DK4" 
+# Labs for Compeng 4DK4 at McMaster University 
