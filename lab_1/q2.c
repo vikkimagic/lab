@@ -51,10 +51,14 @@
  * outputs some statistics such as mean delay.
  */
 
-double simulate(double service_time, unsigned random_seed);
+double simulate(double arrival_rate, unsigned random_seed);
 
 int main()
 {
+    char *filename = "q2.csv";
+    FILE *fp = fopen(filename, "w+");
+    fprintf(fp, "arrival_rate,mean_delay");
+
     const double arrival_rate[9] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
     const unsigned random_seed[10] = {5259140, 400069013, 1139780, 123456, 9817238, 7688798, 340289, 23487989, 19283798, 76877877};
 
@@ -64,9 +68,10 @@ int main()
     {
         sum_time = 0;
         for (int j = 0; j < 10; j++) sum_time += simulate(arrival_rate[i], random_seed[j]);
-        printf("%f", sum_time / 10);
-        if (i != 8) printf(", ");
+        fprintf(fp, "\n%f,%f", arrival_rate[i], sum_time / 10);
     }
+
+    fclose(fp);
 
     return 0;
 }
