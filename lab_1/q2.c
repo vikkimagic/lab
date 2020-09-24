@@ -51,24 +51,44 @@
  * outputs some statistics such as mean delay.
  */
 
-double simulate(double arrival_rate, unsigned random_seed);
+struct Data
+{
+    double utilization;
+    double fraction_served;
+    double mean_number;
+    double mean_delay;
+};
+
+
+void simulate(double arrival_rate, struct Data *res, unsigned random_seed);
 
 int main()
 {
     char *filename = "q2.csv";
     FILE *fp = fopen(filename, "w+");
-    fprintf(fp, "arrival_rate,mean_delay");
+    fprintf(fp, "arrival_rate,utilization,fraction_served,mean_number,mean_delay");
 
     const double arrival_rate[9] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
     const unsigned random_seed[10] = {5259140, 400069013, 1139780, 123456, 9817238, 7688798, 340289, 23487989, 19283798, 76877877};
 
-    double sum_time;
+    struct Data temp;
+
+    double sum_utilization, sum_fraction_served, sum_mean_number, sum_mean_delay;
 
     for (int i = 0; i < 9; i++)
     {
-        sum_time = 0;
-        for (int j = 0; j < 10; j++) sum_time += simulate(arrival_rate[i], random_seed[j]);
-        fprintf(fp, "\n%f,%f", arrival_rate[i], sum_time / 10);
+        sum_utilization = sum_fraction_served = sum_mean_number = sum_mean_delay = 0;
+
+        for (int j = 0; j < 10; j++) {
+            simulate(arrival_rate[i], &temp, random_seed[j]);
+            sum_utilization += temp.utilization;
+            sum_fraction_served += temp.fraction_served;
+            sum_mean_number += temp.mean_number;
+            sum_mean_delay += temp.mean_delay;
+        }
+        
+        fprintf(fp, "\n%f,%f,%f,%f,%f", arrival_rate[i], sum_utilization / 10, sum_fraction_served / 10,
+                                        sum_mean_number / 10, sum_mean_delay/ 10);
     }
 
     fclose(fp);
@@ -76,7 +96,7 @@ int main()
     return 0;
 }
 
-double simulate(double arrival_rate, unsigned random_seed)
+void simulate(double arrival_rate, struct Data *res, unsigned random_seed)
 {
     double clock = 0;
 
@@ -125,5 +145,8 @@ double simulate(double arrival_rate, unsigned random_seed)
         }
     }
 
-    return integral_of_n / total_served;
+    res->utilization = total_busy_time / clock;
+    res->mean_delay = integral_of_n / total_served;
+    res->mean_number = integral_of_n / clock;
+    res->fraction_served = (double)total_served / total_arrived;
 }
